@@ -13,7 +13,8 @@ int main(){
     Board board;
     // board.reset();
     board.player = 0x6648126B3A592402ULL;
-    board.opponent = 0x09862494C5A64B64ULL;
+    board.opponent = 0x0986249445264B64ULL;
+    board.print();
     cerr << "conflict " << (board.player & board.opponent) << endl;
     int depth = N_CELL - pop_count_ull(board.player | board.opponent);
     cerr << "depth " << depth << endl;

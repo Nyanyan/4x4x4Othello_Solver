@@ -37,23 +37,9 @@ int nega_alpha(Board *board, int alpha, int beta, bool passed, int depth){
     uint64_t masked_legal, flip;
     int g, cell, i;
     v = -INF;
-    /*
-    for (cell = first_bit(&legal); legal; cell = next_bit(&legal)){
-        flip = board->get_flip(cell);
-        board->move(flip, cell);
-            g = -nega_alpha(board, -beta, -alpha, false, depth - 1);
-        board->undo(flip, cell);
-        if (v < g){
-            v = g;
-            alpha = max(alpha, g);
-            if (beta <= alpha)
-                break;
-        }
-    }
-    */
     for (i = 0; i < N_CELL_TYPE; ++i){
         masked_legal = legal & cell_type_mask[i];
-        if (masked_legal && alpha <= beta){
+        if (masked_legal && alpha < beta){
             for (cell = first_bit(&masked_legal); masked_legal; cell = next_bit(&masked_legal)){
                 flip = board->get_flip(cell);
                 board->move(flip, cell);
