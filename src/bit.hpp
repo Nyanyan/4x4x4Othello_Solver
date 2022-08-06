@@ -110,3 +110,29 @@ inline int gather_face5(uint64_t x){
 inline int gather_face6(uint64_t x){
     return _pext_u64(x, 0x8888888888888888ULL);
 }
+
+inline uint64_t next_to_corner(uint64_t bits){
+    uint64_t res = 0ULL;
+    uint64_t near_corner = (bits & 0x8008000000008008ULL) >> 1;
+    res |= near_corner;
+    res |= (near_corner & (bits & 0x4004000000004004ULL)) >> 1;
+    near_corner = (bits & 0x1001000000001001ULL) << 1;
+    res |= near_corner;
+    res |= (near_corner & (bits & 0x2002000000002002ULL)) << 1;
+
+    near_corner = (bits & 0x9000000000009000ULL) >> 4;
+    res |= near_corner;
+    res |= (near_corner & (bits & 0x0900000000000900ULL)) >> 4;
+    near_corner = (bits & 0x0009000000000009ULL) << 4;
+    res |= near_corner;
+    res |= (near_corner & (bits & 0x0090000000000090ULL)) << 4;
+
+    near_corner = (bits & 0x9009000000000000ULL) >> 16;
+    res |= near_corner;
+    res |= (near_corner & (bits & 0x0000900900000000ULL)) >> 16;
+    near_corner = (bits & 0x0000000000009009ULL) << 16;
+    res |= near_corner;
+    res |= (near_corner & (bits & 0x0000000090090000ULL)) << 16;
+
+    return res;
+}
