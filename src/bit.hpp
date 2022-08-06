@@ -43,6 +43,7 @@ constexpr int flip_shift[N_FLIP_DIRECTION_4] = {
     0, 0
 };
 
+/*
 inline int pop_count_ull(uint64_t x){
     x = x - ((x >> 1) & 0x5555555555555555ULL);
     x = (x & 0x3333333333333333ULL) + ((x >> 2) & 0x3333333333333333ULL);
@@ -50,6 +51,10 @@ inline int pop_count_ull(uint64_t x){
     x = (x * 0x0101010101010101ULL) >> 56;
     return x;
 }
+*/
+
+//#define	pop_count_ull(x) (int)__popcnt64(x)
+#define	pop_count_ull(x) (int)__builtin_popcountll(x)
 
 inline int ntz(uint64_t *x){
     return pop_count_ull((*x & (-(*x))) - 1);

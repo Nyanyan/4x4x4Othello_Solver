@@ -55,12 +55,10 @@ int nega_alpha(Board *board, int alpha, int beta, bool passed, int depth){
         board->pass();
         return v;
     }
-    uint64_t masked_legal, flip;
-    int g, cell, i;
     v = -INF;
     // corner
     search_next_node(board, &alpha, &beta, &v, depth, legal & 0x9009000000009009ULL);
-    masked_legal = legal & next_to_corner(board->player) & ~0x9009000000009009ULL;
+    uint64_t masked_legal = legal & next_to_corner(board->player) & ~0x9009000000009009ULL;
     search_next_node(board, &alpha, &beta, &v, depth, masked_legal);
     search_next_node(board, &alpha, &beta, &v, depth, legal & ~masked_legal & ~0x9009000000009009ULL);
     return v;

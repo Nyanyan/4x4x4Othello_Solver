@@ -116,10 +116,6 @@ inline uint64_t calc_edge_stability(Board *board){
 
 inline uint64_t calc_stability(Board *board){
     uint64_t stable = calc_edge_stability(board);
-    //cerr << "board" << endl;
-    //board->print();
-    //bit_print(stable);
-    //cerr << endl;
     return stable;
 }
 
