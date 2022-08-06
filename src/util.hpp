@@ -26,3 +26,18 @@ inline void bit_print(uint64_t bits){
     }
     cerr << endl;
 }
+
+inline void bit_print_4bit(int bits){
+    for (int i = 0; i < 4; ++i)
+        cerr << (1 & (bits >> i));
+    cerr << endl;
+}
+
+inline void bit_print_4bit_2(int bits1, int bits2){
+    for (int i = 0; i < 4; ++i)
+        cerr << (1 & (bits1 >> i));
+    cerr << " ";
+    for (int i = 0; i < 4; ++i)
+        cerr << (1 & (bits2 >> i));
+    cerr << endl;
+}

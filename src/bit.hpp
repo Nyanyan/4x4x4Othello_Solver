@@ -66,9 +66,47 @@ inline int gather_line1(uint64_t x){
 }
 
 inline int gather_line2(uint64_t x){
-    return _pext_u64(x, 0x9999000000009999ULL);
+    return (_pext_u64(x, 0x8888000000008888ULL) << 8) | _pext_u64(x, 0x1111000000001111ULL);
 }
 
 inline int gather_line3(uint64_t x){
-    return _pext_u64(x, 0x9009900990099009ULL);
+    return (_pext_u64(x, 0x8000800080008000ULL) << 12) | (_pext_u64(x, 0x1000100010001000ULL) << 8) | (_pext_u64(x, 0x0008000800080008ULL) << 4) | _pext_u64(x, 0x0001000100010001ULL);
+    //return _pext_u64(x, 0x9009900990099009ULL);
+}
+
+inline uint64_t split_line1(int x){
+    return _pdep_u64(x, 0xF00F00000000F00FULL);
+}
+
+inline uint64_t split_line2(int x){
+    return _pdep_u64(x >> 8, 0x8888000000008888ULL) | _pdep_u64(x, 0x1111000000001111ULL);
+}
+
+inline uint64_t split_line3(int x){
+    return _pdep_u64(x >> 12, 0x8000800080008000ULL) | _pdep_u64(x >> 8, 0x1000100010001000ULL) | _pdep_u64(x >> 4, 0x0008000800080008ULL) | _pdep_u64(x, 0x0001000100010001ULL);
+    //return _pdep_u64(x, 0x9009900990099009ULL);
+}
+
+inline int gather_face1(uint64_t x){
+    return _pext_u64(x, 0x000000000000FFFFULL);
+}
+
+inline int gather_face2(uint64_t x){
+    return _pext_u64(x, 0xFFFF000000000000ULL);
+}
+
+inline int gather_face3(uint64_t x){
+    return _pext_u64(x, 0x000F000F000F000FULL);
+}
+
+inline int gather_face4(uint64_t x){
+    return _pext_u64(x, 0xF000F000F000F000ULL);
+}
+
+inline int gather_face5(uint64_t x){
+    return _pext_u64(x, 0x1111111111111111ULL);
+}
+
+inline int gather_face6(uint64_t x){
+    return _pext_u64(x, 0x8888888888888888ULL);
 }

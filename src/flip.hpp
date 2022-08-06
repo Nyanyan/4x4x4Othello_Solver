@@ -24,7 +24,7 @@ inline uint64_t calc_flip(const uint64_t player, const uint64_t opponent, const 
                 if (m2 & player)
                     res |= m1;
             } else{
-                if ((m2 << flip_shift[i]) & player)
+                if ((m2 >> flip_shift[i]) & player)
                     res |= m1 | m2;
             }
         }
