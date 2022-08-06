@@ -7,8 +7,9 @@
 #endif
 
 #define N_FLIP_DIRECTION 14
+#define N_FLIP_DIRECTION_4 16
 
-constexpr uint64_t flip_mask[N_FLIP_DIRECTION] = {
+constexpr uint64_t flip_mask[N_FLIP_DIRECTION_4] = {
     0x6666666666666666ULL, // same face horizontal
     0x0FF00FF00FF00FF0ULL, // same face vertical
     0x0000FFFFFFFF0000ULL, // 3d vertical
@@ -21,10 +22,11 @@ constexpr uint64_t flip_mask[N_FLIP_DIRECTION] = {
     0x0000042004200000ULL, // diagonal 1
     0x0000042004200000ULL, // diagonal 2
     0x0000024002400000ULL, // diagonal 3
-    0x0000024002400000ULL  // diagonal 4
+    0x0000024002400000ULL, // diagonal 4
+    0ULL, 0ULL
 };
 
-constexpr int flip_shift[N_FLIP_DIRECTION] = {
+constexpr int flip_shift[N_FLIP_DIRECTION_4] = {
     1,  // same face horizontal
     4,  // same face vertical
     16, // 3d vertical
@@ -37,7 +39,8 @@ constexpr int flip_shift[N_FLIP_DIRECTION] = {
     11, // diagonal 1
     21, // diagonal 2
     13, // diagonal 3
-    19  // diagonal 4
+    19, // diagonal 4
+    0, 0
 };
 
 inline int pop_count_ull(uint64_t x){
@@ -136,3 +139,105 @@ inline uint64_t next_to_corner(uint64_t bits){
 
     return res;
 }
+
+/*
+Original code: https://github.com/primenumber/issen/blob/72f450256878094ffe90b75f8674599e6869c238/src/move_generator.cpp
+modified by Nyanyan
+*/
+struct u64_4 {
+    __m256i data;
+    u64_4() = default;
+    u64_4(uint64_t val)
+        : data(_mm256_set1_epi64x(val)) {}
+    u64_4(uint64_t w, uint64_t x, uint64_t y, uint64_t z)
+        : data(_mm256_set_epi64x(w, x, y, z)) {}
+    //u64_4(u64_2 x, u64_2 y)
+    //    : data(_mm256_setr_epi64x(_mm_cvtsi128_si64(y.data), _mm_cvtsi128_si64(_mm_unpackhi_epi64(y.data, y.data)), _mm_cvtsi128_si64(x.data), _mm_cvtsi128_si64(_mm_unpackhi_epi64(x.data, x.data)))) {}
+    u64_4(__m256i data) : data(data) {}
+    operator __m256i() { return data; }
+
+    void set(uint64_t val){
+        data = _mm256_set1_epi64x(val);
+    }
+
+    void set(uint64_t w, uint64_t x, uint64_t y, uint64_t z){
+        data = _mm256_set_epi64x(w, x, y, z);
+    }
+};
+
+const u64_4 u64_4_1(1);
+
+inline u64_4 operator>>(const u64_4 lhs, const size_t n) {
+    return _mm256_srli_epi64(lhs.data, n);
+}
+
+inline u64_4 operator>>(const u64_4 lhs, const u64_4 n) {
+    return _mm256_srlv_epi64(lhs.data, n.data);
+}
+
+inline u64_4 operator<<(const u64_4 lhs, const size_t n) {
+    return _mm256_slli_epi64(lhs.data, n);
+}
+
+inline u64_4 operator<<(const u64_4 lhs, const u64_4 n) {
+    return _mm256_sllv_epi64(lhs.data, n.data);
+}
+
+inline u64_4 operator&(const u64_4 lhs, const u64_4 rhs) {
+    return _mm256_and_si256(lhs.data, rhs.data);
+}
+
+inline u64_4 operator|(const u64_4 lhs, const u64_4 rhs) {
+    return _mm256_or_si256(lhs.data, rhs.data);
+}
+
+inline u64_4 operator^(const u64_4 lhs, const u64_4 rhs) {
+    return _mm256_xor_si256(lhs.data, rhs.data);
+}
+
+inline u64_4 operator+(const u64_4 lhs, const u64_4 rhs) {
+    return _mm256_add_epi64(lhs.data, rhs.data);
+}
+
+inline u64_4 operator+(const u64_4 lhs, const uint64_t rhs) {
+    __m256i r64 = _mm256_set1_epi64x(rhs);
+    return _mm256_add_epi64(lhs.data, r64);
+}
+
+inline u64_4 operator-(const u64_4 lhs, const u64_4 rhs) {
+    return _mm256_sub_epi64(lhs.data, rhs.data);
+}
+
+inline u64_4 operator-(const u64_4 lhs) {
+    return _mm256_sub_epi64(_mm256_setzero_si256(), lhs.data);
+}
+
+inline u64_4 operator*(const u64_4 lhs, const u64_4 rhs) {
+    return _mm256_mullo_epi64(lhs.data, rhs.data);
+}
+
+inline u64_4 andnot(const u64_4 lhs, const u64_4 rhs) {
+    return _mm256_andnot_si256(lhs.data, rhs.data);
+}
+
+inline u64_4 operator~(const u64_4 lhs) {
+    return _mm256_andnot_si256(lhs.data, _mm256_set1_epi8(0xFF));
+}
+
+inline u64_4 nonzero(const u64_4 lhs) {
+    return _mm256_cmpeq_epi64(lhs.data, _mm256_setzero_si256()) + u64_4_1;
+}
+
+inline uint64_t all_or(const u64_4 lhs) {
+    __m128i lhs_xz_yw = _mm_or_si128(_mm256_castsi256_si128(lhs.data), _mm256_extractf128_si256(lhs.data, 1));
+    return _mm_extract_epi64(lhs_xz_yw, 0) | _mm_extract_epi64(lhs_xz_yw, 1);
+}
+
+inline uint64_t all_and(const u64_4 lhs) {
+    __m128i lhs_xz_yw = _mm_and_si128(_mm256_castsi256_si128(lhs.data), _mm256_extractf128_si256(lhs.data, 1));
+    return _mm_extract_epi64(lhs_xz_yw, 0) & _mm_extract_epi64(lhs_xz_yw, 1);
+}
+
+/*
+end of modification
+*/
